@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../video.hpp"
 #include "downloaded_videos.hpp"
-#include "video.hpp"
 
 class VideoWrapper {
 public:
