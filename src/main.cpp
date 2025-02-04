@@ -1,8 +1,9 @@
 #include <iostream>
 
+#include "logging.hpp"
 
 
 int main() {
-	std::cout << "Hello, world!" << std::endl;
+    setup_logging();
+    std::cout << "Hello, world!" << std::endl;
 }
-
