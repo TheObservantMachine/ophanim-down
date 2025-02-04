@@ -9,5 +9,5 @@ struct Video {
     int32_t width;
     int32_t height;
     int64_t race_id;
-    std::string media_type;
+    std::string media_type, link;
 };
