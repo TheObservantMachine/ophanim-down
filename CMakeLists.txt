@@ -13,12 +13,17 @@ cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
 
 find_package(cpr REQUIRED)
 find_package(spdlog)
+find_package(nlohmann_json REQUIRED)
 
 # Add executable
-file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp" "src/video_manager/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        cpr::cpr
+        spdlog::spdlog
+        nlohmann_json::nlohmann_json
+)
 
 #  Warnings
 if (MSVC)
