@@ -12,7 +12,7 @@ public:
 
     ~MullvadFactory();
 
-    MullvadWireGuard make_mullvad(int config_index = -1);
+    MullvadWireGuard make_mullvad(int config_index = -1) const;
 
     static std::string invalid_environment();
 

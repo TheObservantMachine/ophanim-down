@@ -16,15 +16,16 @@ find_package(spdlog)
 
 # Add executable
 file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/vpn/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr spdlog::spdlog)
 
 #  Warnings
-if(MSVC)
+if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-else()
+else ()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
+endif ()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

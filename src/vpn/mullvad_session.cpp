@@ -1,5 +1,5 @@
 #include "mullvad_session.hpp"
-#include "constants.hpp"
+#include "../constants.hpp"
 
 
 MullvadSession::MullvadSession() {

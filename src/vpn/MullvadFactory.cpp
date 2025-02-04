@@ -1,14 +1,14 @@
 #include "MullvadFactory.hpp"
+#include "../constants.hpp"
 #include "mullvad_wireguard.hpp"
-#include "constants.hpp"
 
 #include <filesystem>
-#include <fstream>
 #include <format>
+#include <fstream>
 
 
-MullvadFactory::MullvadFactory(const std::string& zip_path , const std::string& config_prefix)
-    : config_prefix_(config_prefix) {
+MullvadFactory::MullvadFactory(const std::string &zip_path, const std::string &config_prefix) :
+    config_prefix_(config_prefix) {
     zip_path_ = zip_path.empty() ? find_zip_path() : zip_path;
     temp_dir_ = create_temp_dir();
     extract_zip();
@@ -19,7 +19,7 @@ MullvadFactory::~MullvadFactory() {
         std::filesystem::remove_all(temp_dir_);
 }
 
-MullvadWireGuard MullvadFactory::make_mullvad(int config_index) {
+MullvadWireGuard MullvadFactory::make_mullvad(int config_index) const {
     if (config_files_.empty())
         throw std::runtime_error("No config files available");
 
@@ -29,10 +29,10 @@ MullvadWireGuard MullvadFactory::make_mullvad(int config_index) {
     if (static_cast<size_t>(config_index) >= config_files_.size())
         throw std::out_of_range("Invalid config index");
 
-    return MullvadWireGuard(config_files_[config_index]);
+    return {config_files_[config_index]};
 }
 
- std::string MullvadFactory::invalid_environment() {
+std::string MullvadFactory::invalid_environment() {
     if (!command_exists("wg-quick"))
         return "wg-quick not found. Install WireGuard tools.";
     return "";
@@ -43,7 +43,7 @@ void MullvadFactory::extract_zip() {
     if (system(cmd.c_str()) != 0)
         throw std::runtime_error("Failed to extract ZIP");
 
-    for (const auto& entry : std::filesystem::directory_iterator(temp_dir_)) {
+    for (const auto &entry: std::filesystem::directory_iterator(temp_dir_)) {
         if (entry.path().extension() == ".conf") {
             std::string config_path = entry.path().string();
             modify_allowed_ips(config_path);
@@ -52,7 +52,7 @@ void MullvadFactory::extract_zip() {
     }
 }
 
-void MullvadFactory::modify_allowed_ips(const std::string& config_path) {
+void MullvadFactory::modify_allowed_ips(const std::string &config_path) {
     std::vector<std::string> lines;
     std::string current_section;
     std::ifstream in(config_path);
@@ -74,7 +74,7 @@ void MullvadFactory::modify_allowed_ips(const std::string& config_path) {
     in.close();
 
     std::ofstream out(config_path);
-    for (const auto& l : lines)
+    for (const auto &l: lines)
         out << l << std::endl;
     out.close();
 }
@@ -86,14 +86,13 @@ std::string MullvadFactory::create_temp_dir() {
     return dir_template;
 }
 
-bool MullvadFactory::command_exists(const std::string& cmd) {
+bool MullvadFactory::command_exists(const std::string &cmd) {
     return system(("command -v " + cmd + " >/dev/null 2>&1").c_str()) == 0;
 }
 
 std::string MullvadFactory::find_zip_path() const {
-    for (const auto& entry : std::filesystem::directory_iterator(".")) {
-        if (entry.path().string().find("mullvad_wireguard") != std::string::npos &&
-            entry.path().extension() == ".zip")
+    for (const auto &entry: std::filesystem::directory_iterator(".")) {
+        if (entry.path().string().find("mullvad_wireguard") != std::string::npos && entry.path().extension() == ".zip")
             return entry.path().string();
     }
     throw std::runtime_error("Mullvad ZIP not found");
