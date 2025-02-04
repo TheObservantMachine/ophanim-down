@@ -6,7 +6,7 @@
 
 class DownloadedVideos {
 public:
-    std::vector<int> downloaded_ids;
+    std::vector<int64_t> downloaded_ids;
 
     DownloadedVideos() = default;
     DownloadedVideos(const std::vector<int> &ids);
