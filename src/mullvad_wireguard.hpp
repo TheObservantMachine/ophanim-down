@@ -18,8 +18,7 @@ public:
 
 private:
     static std::string get_interface_name(const std::string &path);
-
-    void execute_command(const std::string &cmd);
+    static void execute_command(const std::string &cmd);
 
 private:
     bool m_is_connected;

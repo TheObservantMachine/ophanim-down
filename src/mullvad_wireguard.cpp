@@ -47,7 +47,7 @@ std::string MullvadWireGuard::get_interface_name(const std::string &path) {
     return p.stem().string();
 }
 
-void execute_command(const std::string &cmd) {
+void MullvadWireGuard::execute_command(const std::string &cmd) {
     spdlog::debug("Executing: " + cmd);
     const std::string full_cmd = cmd + " 2>&1";
     FILE *pipe = popen(full_cmd.c_str(), "r");
@@ -59,7 +59,7 @@ void execute_command(const std::string &cmd) {
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
         result += buffer;
 
-    int status = pclose(pipe);
+    const int status = pclose(pipe);
     if (WEXITSTATUS(status) != 0)
         throw std::runtime_error("Command failed: " + result);
 }
