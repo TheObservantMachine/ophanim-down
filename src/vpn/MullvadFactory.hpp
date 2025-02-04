@@ -8,7 +8,7 @@ class MullvadWireGuard;
 
 class MullvadFactory {
 public:
-    MullvadFactory(const std::string& zip_path = "", const std::string& config_prefix = "");
+    MullvadFactory(const std::string& zip_path = "", std::string config_prefix = "");
 
     ~MullvadFactory();
 

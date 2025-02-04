@@ -5,10 +5,11 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <utility>
 
 
-MullvadFactory::MullvadFactory(const std::string &zip_path, const std::string &config_prefix) :
-    config_prefix_(config_prefix) {
+MullvadFactory::MullvadFactory(const std::string &zip_path, std::string config_prefix) :
+    config_prefix_(std::move(config_prefix)) {
     zip_path_ = zip_path.empty() ? find_zip_path() : zip_path;
     temp_dir_ = create_temp_dir();
     extract_zip();

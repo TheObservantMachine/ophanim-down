@@ -15,8 +15,7 @@ find_package(cpr REQUIRED)
 find_package(spdlog)
 
 # Add executable
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-file(GLOB_RECURSE SOURCES "src/vpn/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr spdlog::spdlog)
