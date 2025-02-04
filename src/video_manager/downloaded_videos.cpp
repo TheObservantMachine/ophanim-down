@@ -6,7 +6,7 @@
 #include "spdlog/spdlog.h"
 
 
-DownloadedVideos::DownloadedVideos(std::vector<int64_t> ids) : downloaded_ids(std::move(ids)) {}
+DownloadedVideos::DownloadedVideos(std::vector<int64_t> ids) : m_downloaded_ids(std::move(ids)) {}
 
 DownloadedVideos DownloadedVideos::load(const std::filesystem::path &path) {
     if (!exists(path) || is_regular_file(path)) {
@@ -40,11 +40,13 @@ void DownloadedVideos::save(const std::filesystem::path &path) const {
         if (!f.is_open())
             throw std::runtime_error("Could not open file");
         nlohmann::json data;
-        data["downloaded_ids"] = downloaded_ids;
+        data["downloaded_ids"] = m_downloaded_ids;
         f << data.dump();
     } catch (const std::exception &e) {
         spdlog::error("Error saving to file {}: {}", path.string(), e.what());
         throw;
     }
 }
-void DownloadedVideos::add_id(const int64_t id) { downloaded_ids.push_back(id); }
+void DownloadedVideos::add_id(const int64_t id) { m_downloaded_ids.push_back(id); }
+
+const std::vector<int64_t> &DownloadedVideos::get_ids() const { return m_downloaded_ids; }
