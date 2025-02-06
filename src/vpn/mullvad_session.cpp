@@ -23,27 +23,30 @@ bool MullvadSession::am_i_mullvad() {
     return response.text.find("You are using Mullvad VPN") != std::string::npos;
 }
 
+class WriteCallback : public cpr::WriteCallback {
+public:
+    explicit WriteCallback(std::ofstream ofs) : m_ofs(std::move(ofs)) {}
+    bool operator()(const std::string_view &data, intptr_t _) {
+        try {
+            m_ofs.write(data.data(), static_cast<std::streamsize>(data.size()));
+        } catch (std::ofstream::failure &e) {
+            spdlog::error("Write failed: {}", e.what());
+            return false;
+        }
+        return true;
+    }
 
-// Callback function that writes data to an output file stream.
-// The callback signature matches what CPR (via libcurl) expects:
-//   - ptr: pointer to the received data
-//   - size: size of each data element
-//   - nmemb: number of data elements
-//   - userdata: pointer to user data (we pass our std::ofstream pointer here)
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    std::ofstream *ofs = static_cast<std::ofstream *>(userdata);
-    const std::size_t total_size = size * nmemb;
-    ofs->write(ptr, total_size);
-    return total_size; // Return the number of bytes written
-}
+private:
+    std::ofstream m_ofs;
+};
 
 void MullvadSession::download_video(std::filesystem::path save_dir, Video &video) {
     auto filename = video.link.substr(video.link.rfind('/'));
     spdlog::info("Downloading {} {}-file ({}x{}): {}", filename, video.media_type, video.width, video.height,
                  video.link);
     std::ofstream file(save_dir / filename, std::ios::binary);
-    SetOption(cpr::WriteCallbackOption(write_callback));
-    SetOption(cpr::UserDataOption(&ofs));
+    SetOption(WriteCallback(std::move(file)));
+
     auto response = Get(cpr::Url{filename});
     if (response.status_code != 200)
         throw InvalidStatusCode("Download failed: " + response.error.message);
