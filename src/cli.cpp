@@ -90,7 +90,7 @@ Cli Cli::parse_cli(int argc, char *argv[]) {
 }
 
 consteval const char *get_help() {
-    return R"(Usage: program [OPTIONS]
+    return R"(Usage: ophanim-down [OPTIONS]
 Options:
   -h, --help                      Show this help message and exit
   -p, --db-path <path>            Path to sqlite3 db file (required)
