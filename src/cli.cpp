@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <format>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -9,7 +10,7 @@
 
 // A simple helper to check if a string starts with a given pattern.
 bool starts_with(std::string_view s, std::string_view pattern) {
-    size_t size = pattern.size();
+    const size_t size = pattern.size();
     if (size == 0)
         return true;
     if (size > s.size())
@@ -20,6 +21,32 @@ bool starts_with(std::string_view s, std::string_view pattern) {
     }
     return true;
 }
+
+
+class Missing {
+public:
+    void add(const char *arg) {
+        if (number_missing) {
+            missing += ", ";
+        }
+        number_missing += 1;
+        missing += arg;
+    }
+
+    void throw_if() {
+        if (!number_missing)
+            return;
+        const auto str = std::format("Missing required {} for: {}", option(), missing);
+        throw InvalidCommandException(str);
+    }
+
+private:
+    [[nodiscard]] const char *option() const { return number_missing > 1 ? "options" : "option"; }
+
+private:
+    std::string missing;
+    int number_missing = 0;
+};
 
 //
 // Cli::parse_cli
@@ -77,14 +104,16 @@ Cli Cli::parse_cli(int argc, char *argv[]) {
     }
 
     // Validate that all required options have been provided.
+    Missing missing;
     if (cli.db_path.empty())
-        throw InvalidCommandException("Missing required option --db-path/-p");
+        missing.add("--db-path/-p");
     if (cli.video_dir.empty())
-        throw InvalidCommandException("Missing required option --video-dir/-d");
+        missing.add("--video-dir/-d");
     if (cli.id_dir.empty())
-        throw InvalidCommandException("Missing required option --id-dir/-i");
+        missing.add("--id-dir/-i");
     if (cli.mullvad_zip.empty())
-        throw InvalidCommandException("Missing required option --mullvad-zip/-z");
+        missing.add("--mullvad-zip/-z");
+    missing.throw_if();
 
     return cli;
 }
@@ -106,6 +135,4 @@ Options:
 //
 // Outputs the help message to standard error.
 //
-void Cli::show_help() {
-    std::cerr << get_help() << std::flush;
-}
+void Cli::show_help() { std::cerr << get_help() << std::flush; }
