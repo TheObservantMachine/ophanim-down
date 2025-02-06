@@ -13,7 +13,6 @@ MullvadWireGuard::~MullvadWireGuard() {
         close();
 }
 
-
 void MullvadWireGuard::start() {
     spdlog::info("Starting WireGuard connection...");
     execute_command("wg-quick up " + m_config_file);

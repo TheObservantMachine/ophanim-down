@@ -26,7 +26,7 @@ bool MullvadSession::am_i_mullvad() {
 class WriteCallback : public cpr::WriteCallback {
 public:
     explicit WriteCallback(std::ofstream ofs) : m_ofs(std::move(ofs)) {}
-    bool operator()(const std::string_view &data, intptr_t _) {
+    bool operator()(const std::string_view &data, [[maybe_unused]] intptr_t _) {
         try {
             m_ofs.write(data.data(), static_cast<std::streamsize>(data.size()));
         } catch (std::ofstream::failure &e) {
@@ -40,7 +40,7 @@ private:
     std::ofstream m_ofs;
 };
 
-void MullvadSession::download_video(std::filesystem::path save_dir, Video &video) {
+void MullvadSession::download_video(const std::filesystem::path &save_dir, const Video &video) {
     auto filename = video.link.substr(video.link.rfind('/'));
     spdlog::info("Downloading {} {}-file ({}x{}): {}", filename, video.media_type, video.width, video.height,
                  video.link);

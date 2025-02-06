@@ -12,9 +12,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "Release flags" FORCE)
 cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
 
 find_package(cpr REQUIRED)
-find_package(spdlog)
+find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package (SQLite3)
+find_library(SQLITE3_LIBRARY sqlite3 REQUIRED)
 
 # Add executable
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp" "src/video_manager/*.cpp")
@@ -24,7 +24,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         cpr::cpr
         spdlog::spdlog
         nlohmann_json::nlohmann_json
-        SQLite3
+        ${SQLITE3_LIBRARY}
 )
 
 #  Warnings

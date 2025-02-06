@@ -20,7 +20,7 @@ MullvadFactory::~MullvadFactory() {
         std::filesystem::remove_all(temp_dir_);
 }
 
-MullvadWireGuard MullvadFactory::make_mullvad(int config_index) const {
+std::unique_ptr<MullvadWireGuard> MullvadFactory::make_mullvad(int config_index) const {
     if (config_files_.empty())
         throw std::runtime_error("No config files available");
 
@@ -30,7 +30,7 @@ MullvadWireGuard MullvadFactory::make_mullvad(int config_index) const {
     if (static_cast<size_t>(config_index) >= config_files_.size())
         throw std::out_of_range("Invalid config index");
 
-    return {config_files_[config_index]};
+    return std::make_unique<MullvadWireGuard>(config_files_[config_index]);
 }
 
 std::string MullvadFactory::invalid_environment() {
