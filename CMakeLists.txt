@@ -11,6 +11,17 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "Release flags" FORCE)
 #  Use modern CMake policies
 cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
 
+# Check for <format> support 
+include(CheckIncludeFileCXX)
+check_include_file_cxx("format" HAS_STD_FORMAT)
+if(NOT HAS_STD_FORMAT)
+  message(STATUS "<format> header not found; using libfmt as a fallback")
+  find_package(fmt REQUIRED)
+else()
+  message(STATUS "Compiler supports <format>")
+endif()
+
+
 find_package(CURL REQUIRED) 
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -28,6 +39,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         ${SQLITE3_LIBRARY}
         CURL::libcurl
 )
+
+# Link against libfmt if std::format isn’t available.
+if(NOT HAS_STD_FORMAT)
+  target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+endif()
 
 #  Warnings
 if (MSVC)
