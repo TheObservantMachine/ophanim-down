@@ -6,9 +6,10 @@
 #include "curl/easy.h"
 #include "spdlog/spdlog.h"
 
+#include <format>
 
-MullvadSession::MullvadSession() :
-    m_curl(curl_easy_init()), m_proxy(std::string("socks5h://") + std::string(SOCKS5_IP)) {
+
+MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_proxy(nullptr) {
     if (!m_curl)
         throw std::runtime_error("Failed to initialize CURL");
 }
@@ -16,6 +17,18 @@ MullvadSession::MullvadSession() :
 MullvadSession::~MullvadSession() {
     if (m_curl)
         curl_easy_cleanup(m_curl);
+    delete[] m_proxy;
+}
+
+void MullvadSession::enable_proxy(bool enable) {
+    if (enable != (m_proxy == nullptr))
+        return;
+
+    if (enable) {
+        m_proxy = std::format("socks5h://{}", SOCKS5_IP).c_str();
+    } else {
+        delete[] m_proxy;
+    }
 }
 
 size_t write_string_callback(void *contents, size_t size, size_t nmemb, void *userdata) {
@@ -28,7 +41,8 @@ size_t write_string_callback(void *contents, size_t size, size_t nmemb, void *us
 std::string MullvadSession::get(const char *url) {
     curl_easy_reset(m_curl);
 
-    curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy.c_str());
+    if (m_proxy)
+        curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
     curl_easy_setopt(m_curl, CURLOPT_URL, url);
 
     std::string response_text;
@@ -94,7 +108,7 @@ AmIMullvad MullvadSession::am_i_mullvad() {
         }
     }
 
-    if (result.ip_address.empty()) 
+    if (result.ip_address.empty())
         throw std::runtime_error("Faulty html: IP address not found");
 
     return result;
@@ -116,7 +130,8 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
 
     // Reset the curl handle before the new transfer.
     curl_easy_reset(m_curl);
-    curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy.c_str());
+    if(m_proxy)
+        curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
     curl_easy_setopt(m_curl, CURLOPT_URL, video.link.c_str());
     // Use fwrite to write directly to the file.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, fwrite);

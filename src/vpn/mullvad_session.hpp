@@ -28,8 +28,10 @@ public:
     std::string get(const char *url);
     void download_video(const std::filesystem::path &save_dir, const Video &video);
     AmIMullvad am_i_mullvad();
+    void enable_proxy(bool enable);
 
 private:
     CURL *m_curl;
-    const std::string m_proxy;
+    bool m_is_proxy_enabled;
+    const char *m_proxy;
 };

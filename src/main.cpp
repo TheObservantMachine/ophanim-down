@@ -34,6 +34,17 @@ int main(int argc, char *argv[]) {
     const MullvadFactory factory(cli.mullvad_zip);
     std::unique_ptr<MullvadWireGuard> mullvad;
     MullvadSession session;
+    std::string real_ip;
+    {
+        auto aim = session.am_i_mullvad();
+        if (aim.is_mullvad) {
+            spdlog::error("We are mullvad before we should be!");
+            return EXIT_FAILURE;
+        }
+        spdlog::info("Real ip is {}", aim.ip_address);
+        real_ip = std::move(aim.ip_address);
+    }
+    session.enable_proxy(true);
     size_t counter = 0;
 
     auto video_manager = VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
@@ -44,7 +55,14 @@ int main(int argc, char *argv[]) {
                 spdlog::error("Mullvad isn't connected");
                 return EXIT_FAILURE;
             }
+            auto aim = session.am_i_mullvad();
+            if (!aim.is_mullvad) {
+                spdlog::error("We aren't mullvad!!");
+                return EXIT_FAILURE;
+            }
+            spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
         }
+
         auto &video = wrapped.get_video();
         session.download_video(cli.video_dir, video);
     }
