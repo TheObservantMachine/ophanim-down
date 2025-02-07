@@ -11,6 +11,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "Release flags" FORCE)
 #  Use modern CMake policies
 cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
 
+find_package(CURL REQUIRED) 
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_library(SQLITE3_LIBRARY sqlite3 REQUIRED)
@@ -19,10 +20,13 @@ find_library(SQLITE3_LIBRARY sqlite3 REQUIRED)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp" "src/video_manager/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+include_directories(${CURL_INCLUDE_DIR})
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
         spdlog::spdlog
         nlohmann_json::nlohmann_json
         ${SQLITE3_LIBRARY}
+        CURL::libcurl
 )
 
 #  Warnings
