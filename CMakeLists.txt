@@ -10,35 +10,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "Release flags" FORCE)
 
 #  Use modern CMake policies
 cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
-include(FetchContent)
 
-find_package(spdlog QUIET)
-if (NOT spdlog_FOUND)
-    message("Fetching dependency from github: spdlog")
-    FetchContent_Declare(
-            spdlog
-            GIT_REPOSITORY https://github.com/gabime/spdlog.git
-            GIT_TAG v1.15.1
-    )
-    # Avoid building spdlog tests and examples
-    set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "")
-    set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "")
-    FetchContent_MakeAvailable(spdlog)
-endif ()
-
-# Check and fetch nlohmann_json
-find_package(nlohmann_json QUIET)
-if (NOT nlohmann_json_FOUND)
-    message("Fetching dependency from github: nlohmann-json")
-    FetchContent_Declare(
-            nlohmann_json
-            GIT_REPOSITORY https://github.com/nlohmann/json.git
-            GIT_TAG v3.11.3
-    )
-    FetchContent_MakeAvailable(nlohmann_json)
-endif ()
-
-# We won't bother to download this one
+find_package(spdlog REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_library(SQLITE3_LIBRARY sqlite3 REQUIRED)
 
 # Add executable
