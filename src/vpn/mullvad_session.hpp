@@ -1,6 +1,10 @@
 #pragma once
 
-#include "cpr/session.h"
+#include "curl/curl.h"
+
+#include <filesystem>
+#include <string>
+
 
 class Video;
 
@@ -10,11 +14,22 @@ public:
     explicit InvalidStatusCode(const char *string) : runtime_error(string) {}
 };
 
-class MullvadSession : public cpr::Session {
+
+struct AmIMullvad {
+    bool is_mullvad = false;
+    std::string ip_address, server_config, location;
+};
+
+class MullvadSession {
 public:
     MullvadSession();
+    ~MullvadSession();
 
-    cpr::Response Get(const cpr::Url &url);
+    std::string get(const char *url);
     void download_video(const std::filesystem::path &save_dir, const Video &video);
-    bool am_i_mullvad();
+    AmIMullvad am_i_mullvad();
+
+private:
+    CURL *m_curl;
+    const std::string m_proxy;
 };

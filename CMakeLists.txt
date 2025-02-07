@@ -12,19 +12,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "Release flags" FORCE)
 cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
 include(FetchContent)
 
-# Check and fetch CPR
-find_package(cpr QUIET)
-if (NOT cpr_FOUND)
-    message("Fetching dependency from github: cpr")
-    FetchContent_Declare(
-            cpr
-            GIT_REPOSITORY https://github.com/libcpr/cpr.git
-            GIT_TAG 1.9.9
-    )
-    FetchContent_MakeAvailable(cpr)
-endif ()
-
-# Check and fetch spdlog
 find_package(spdlog QUIET)
 if (NOT spdlog_FOUND)
     message("Fetching dependency from github: spdlog")
@@ -59,7 +46,6 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp" "src/video_manager/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        cpr::cpr
         spdlog::spdlog
         nlohmann_json::nlohmann_json
         ${SQLITE3_LIBRARY}
