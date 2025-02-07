@@ -7,10 +7,16 @@
 
 class sqlite3;
 
+/**
+ * VideoManager for keeping track of already downloaded IDS.
+ * It will autosave upon destruction.
+ */
 class VideoManager {
 public:
     VideoManager(std::filesystem::path save_path, DownloadedVideos downloaded_videos,
                  const std::vector<Video> &to_download);
+
+    ~VideoManager();
 
     // Iterator support.
     VideoIterator begin();

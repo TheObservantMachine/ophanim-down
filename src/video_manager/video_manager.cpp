@@ -11,6 +11,8 @@ VideoManager::VideoManager(std::filesystem::path save_path, DownloadedVideos dow
                            const std::vector<Video> &to_download) :
     m_save_path{std::move(save_path)}, m_downloaded_videos{std::move(downloaded_videos)}, m_to_download{to_download} {}
 
+VideoManager::~VideoManager() { save(); }
+
 VideoIterator VideoManager::begin() { return {m_to_download, 0, m_downloaded_videos}; }
 VideoIterator VideoManager::end() { return {m_to_download, m_to_download.size(), m_downloaded_videos}; }
 

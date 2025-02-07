@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
     session.enable_proxy(true);
     size_t counter = 0;
 
+    // The videomanager will autosave
     auto video_manager = VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
     for (auto wrapped: video_manager) {
         if (++counter % cli.switch_mullvad_after == 0) {
@@ -66,6 +67,4 @@ int main(int argc, char *argv[]) {
         auto &video = wrapped.get_video();
         session.download_video(cli.video_dir, video);
     }
-
-    video_manager.save();
 }
