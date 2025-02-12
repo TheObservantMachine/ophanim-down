@@ -1,4 +1,5 @@
 #include <atomic>
+#include <chrono>
 #include <csignal>
 #include <iostream>
 
@@ -92,7 +93,10 @@ int main(int argc, char *argv[]) {
                         is_err = false;
                         break;
                     } catch (const std::exception &e) {
-                        spdlog::error("Failed to check mullvad ({}/{}) with error: {}", err_count, MAX_ERR, e.what());
+                        size_t to_sleep = (err_count + 1) * 5;
+                        spdlog::error("Failed to check mullvad ({}/{}). Waiting {} s. Got error: {}", err_count,
+                                      MAX_ERR, to_sleep, e.what());
+                        std::this_thread::sleep_for(std::chrono::seconds(to_sleep));
                         is_err = true;
                     }
                 }
@@ -109,7 +113,10 @@ int main(int argc, char *argv[]) {
                     is_err = false;
                     break;
                 } catch (const std::exception &e) {
-                    spdlog::error("Failed to get video ({}/{}) with error: {}", err_count, MAX_ERR, e.what());
+                    size_t to_sleep = (err_count + 1) * 5;
+                    spdlog::error("Failed to get video ({}/{}). Waiting {} s. Got error: {}", err_count, MAX_ERR,
+                                  to_sleep, e.what());
+                    std::this_thread::sleep_for(std::chrono::seconds(to_sleep));
                     is_err = true;
                 }
             }
