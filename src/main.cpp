@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     // The videomanager will autosave
     auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
     for (auto wrapped: video_manager) {
-        if (++counter % cli.switch_mullvad_after == 0) {
+        if (counter++ % cli.switch_mullvad_after == 0) {
             mullvad = factory.make_mullvad();
             if (!mullvad->is_connected()) {
                 spdlog::error("Mullvad isn't connected");
