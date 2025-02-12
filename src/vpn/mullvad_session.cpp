@@ -143,7 +143,7 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     double elapsed_seconds = std::chrono::duration<double>(elapsed_time).count();
     double downloaded_mib = static_cast<double>(bytes_downloaded) / (1024.0 * 1024.0);
     double average_speed_mib_ps = (elapsed_seconds > 0.0) ? downloaded_mib / elapsed_seconds : 0.0;
-    spdlog::info("Average download speed was {:.2f} MiB/s", average_speed_mib_ps);
+    spdlog::info("Downloaded {:.2f} MB @ ~{:.2f} Mib/s",downloaded_mib, average_speed_mib_ps * 8);
 
     long http_code = 0;
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);
