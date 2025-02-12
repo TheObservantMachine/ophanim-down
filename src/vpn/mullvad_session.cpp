@@ -41,7 +41,7 @@ std::string MullvadSession::get(const char *url) {
     curl_easy_reset(m_curl);
 
     if (m_is_proxy_enabled)
-        curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
+        curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy.c_str());
     curl_easy_setopt(m_curl, CURLOPT_URL, url);
 
     std::string response_text;
@@ -112,7 +112,7 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     // Reset the curl handle before the new transfer.
     curl_easy_reset(m_curl);
     if (m_is_proxy_enabled)
-        curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
+        curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy.c_str());
     curl_easy_setopt(m_curl, CURLOPT_URL, video.link.c_str());
     // Use fwrite to write directly to the file.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, fwrite);
