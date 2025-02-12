@@ -29,7 +29,7 @@ std::unique_ptr<MullvadWireGuard> MullvadFactory::make_mullvad(int32_t config_in
         throw std::runtime_error("No config files available");
 
     if (config_index == -1) {
-        std::uniform_int_distribution<std::mt19937::result_type> random_index(0, m_config_files.size());
+        std::uniform_int_distribution<std::mt19937::result_type> random_index(0, m_config_files.size() - 1);
         config_index = random_index(m_random_engine);
     }
 
