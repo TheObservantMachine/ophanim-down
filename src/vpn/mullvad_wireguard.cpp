@@ -10,7 +10,9 @@ MullvadWireGuard::MullvadWireGuard(std::string config_file) :
 }
 
 MullvadWireGuard::~MullvadWireGuard() {
-    if (is_connected())
+    bool connected = is_connected();
+    spdlog::debug("In MullvadWireGuard destrucor. Is connected = {}", connected ? "true" : "false");
+    if (connected)
         close();
 }
 
