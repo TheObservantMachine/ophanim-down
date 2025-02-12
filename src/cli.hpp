@@ -29,7 +29,7 @@ public:
 class Cli {
 public:
     std::filesystem::path db_path, video_dir, id_dir, mullvad_zip;
-    int switch_mullvad_after;
+    int switch_mullvad_after, max_mib_ps;
 };
 
 Cli parse_cli(int argc, char **argv);

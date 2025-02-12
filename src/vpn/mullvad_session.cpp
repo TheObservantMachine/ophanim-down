@@ -11,9 +11,13 @@
 
 namespace vpn {
 
-MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_proxy() {
+constexpr inline int32_t mib_to_bytes(int32_t bytes) { return bytes * 1024 * 1024 / 8; }
+
+MullvadSession::MullvadSession(bool proxy_enabled, int32_t max_speed_mib_ps) :
+    m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_max_speed(mib_to_bytes(max_speed_mib_ps)) {
     if (!m_curl)
         throw std::runtime_error("Failed to initialize CURL");
+    enable_proxy(proxy_enabled);
 }
 
 MullvadSession::~MullvadSession() {
@@ -29,6 +33,9 @@ void MullvadSession::enable_proxy(bool enable) {
 
     m_is_proxy_enabled = enable;
 }
+
+void MullvadSession::set_max_speed_mib_ps(int32_t mib_ps) { m_max_speed = mib_to_bytes(mib_ps); }
+int32_t MullvadSession::get_max_speed_mib_ps() const { return m_max_speed * 8 / (1024 * 1024); }
 
 size_t write_string_callback(void *contents, size_t size, size_t nmemb, void *userdata) {
     std::string *response = static_cast<std::string *>(userdata);
@@ -112,6 +119,9 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     curl_easy_reset(m_curl);
     if (m_is_proxy_enabled)
         curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy.c_str());
+    if (m_max_speed)
+        curl_easy_setopt(m_curl, CURLOPT_MAX_RECV_SPEED_LARGE, m_max_speed);
+
     curl_easy_setopt(m_curl, CURLOPT_URL, video.link.c_str());
     // Use fwrite to write directly to the file.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, fwrite);

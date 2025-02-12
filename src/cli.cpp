@@ -63,6 +63,7 @@ private:
 cli::Cli cli::parse_cli(int argc, char *argv[]) {
     cli::Cli cli;
     cli.switch_mullvad_after = 10;
+    cli.max_mib_ps = 0;
 
     // Process each argument.
     for (int i = 1; i < argc; ++i) {
@@ -95,6 +96,14 @@ cli::Cli cli::parse_cli(int argc, char *argv[]) {
             } catch (const std::exception &ex) {
                 throw InvalidCommandException("Invalid integer value for " + std::string(arg));
             }
+        } else if (arg == "--max-speed" || arg == "-m") {
+            if (++i >= argc)
+                throw InvalidCommandException("Missing value for " + std::string(arg));
+            try {
+                cli.max_mib_ps = std::stoi(argv[i]);
+            } catch (const std::exception &ex) {
+                throw InvalidCommandException("Invalid integer value for " + std::string(arg));
+            }
         } else if (starts_with(arg, "-")) {
             throw InvalidCommandException("Unknown option: " + std::string(arg));
         } else {
@@ -121,11 +130,12 @@ cli::Cli cli::parse_cli(int argc, char *argv[]) {
 consteval const char *get_help() {
     return R"(Usage: ophanim-down [OPTIONS]
 Options:
-  -h, --help                      Show this help message and exit
-  -p, --db-path <path>            Path to sqlite3 db file (required)
-  -d, --video-dir <path>          Path to dir to download videos to (required)
-  -i, --id-dir <path>             Path to dir where to save the ids of downloaded videos (required)
-  -z, --mullvad-zip <path>        Path to mullvad zip file (wireguard) (required)
+  -h, --help                       Show this help message and exit
+  -p, --db-path <path>             Path to sqlite3 db file (required)
+  -d, --video-dir <path>           Path to dir to download videos to (required)
+  -i, --id-dir <path>              Path to dir where to save the ids of downloaded videos (required)
+  -z, --mullvad-zip <path>         Path to mullvad zip file (wireguard) (required)
+  -m, --max-speed <int>            Max speed in Mib/s to download in. Disabled by default.
   -s, --switch-mullvad-after <int> Switch mullvad connection after (default: 10)
 )";
 }

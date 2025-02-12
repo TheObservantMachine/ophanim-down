@@ -58,6 +58,12 @@ int main(int argc, char *argv[]) {
         real_ip = std::move(aim.ip_address);
     }
     session.enable_proxy(true);
+    session.set_max_speed_mib_ps(cli.max_mib_ps);
+    if (cli.max_mib_ps)
+        spdlog::info("Speedlimit is set to {} Mib/s", cli.max_mib_ps);
+    else
+        spdlog::info("Speedlimit is set to unlimited");
+
     size_t counter = 0;
 
     // The videomanager will autosave
@@ -80,7 +86,8 @@ int main(int argc, char *argv[]) {
         session.download_video(cli.video_dir, wrapped_video.get_video());
         wrapped_video.mark_done();
 
-        if (should_shutdown) break;
+        if (should_shutdown)
+            break;
     }
 
     spdlog::info("Downloaded {} tasks this run.", counter);
