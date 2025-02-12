@@ -33,8 +33,9 @@ public:
 class MacVpnOsSpecific final : public VpnOsSpecific {
 public:
     [[nodiscard]] bool is_connected(const std::string &interface_name) const override {
-        const std::string ret = exec("netstat -rn -f inet");
-        return ret.find("tun") != std::string::npos;
+        const std::string cmd = "ifconfig " + interface_name;
+        const std::string ret = exec(cmd.c_str());
+        return ret.find("inet ") != std::string::npos;
     }
 };
 
