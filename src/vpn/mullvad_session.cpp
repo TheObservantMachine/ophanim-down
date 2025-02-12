@@ -120,11 +120,20 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(m_curl, CURLOPT_FAILONERROR, 1L);
 
+    const auto before_request = std::chrono::system_clock::now();
     CURLcode res = curl_easy_perform(m_curl);
     fclose(fp);
 
     if (res != CURLE_OK)
         throw InvalidStatusCode("Download failed: " + std::string(curl_easy_strerror(res)));
+
+    curl_off_t bytes_downloaded;
+    curl_easy_getinfo(m_curl, CURLINFO_SIZE_DOWNLOAD_T, &bytes_downloaded);
+    const auto elapsed_time = std::chrono::system_clock::now() - before_request;
+    double elapsed_seconds = std::chrono::duration<double>(elapsed_time).count();
+    double downloaded_mib = static_cast<double>(bytes_downloaded) / (1024.0 * 1024.0);
+    double average_speed_mib_ps = (elapsed_seconds > 0.0) ? downloaded_mib / elapsed_seconds : 0.0;
+    spdlog::info("Average download speed was {:.2f} MiB/s", average_speed_mib_ps);
 
     long http_code = 0;
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);
@@ -141,7 +150,7 @@ bool AmIMullvad::parse_server_config(const std::string_view line) {
     size_t end = line.find(')', start);
     if (end == std::string::npos)
         return false;
-    
+
     server_config = line.substr(start, end - start);
     return true;
 }
