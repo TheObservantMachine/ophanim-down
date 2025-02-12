@@ -99,8 +99,8 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
         throw std::runtime_error(std::format("Failed to find filename in '{}'", video.link));
     std::string filename = video.link.substr(pos + 1);
 
-    spdlog::info("Downloading {} {}-file ({}x{}): {}", filename, video.media_type, video.width, video.height,
-                 video.link);
+    spdlog::info("Downloading {} {}: ({}x{})", filename, video.media_type, video.width, video.height);
+    spdlog::debug("Link of {}: {}", filename, video.link);
 
     std::filesystem::path full_path = save_dir / filename;
 
