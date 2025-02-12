@@ -18,7 +18,7 @@ void signal_handler(int signal) {
     if (signal != SIGINT)
         return;
     should_shutdown = true;
-    spdlog::info("Shutting down, when done!");
+    spdlog::warn("Shutting down, when done!");
 }
 
 
@@ -68,28 +68,32 @@ int main(int argc, char *argv[]) {
 
     // The videomanager will autosave
     auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
-    for (auto wrapped_video: video_manager) {
-        if (counter++ % cli.switch_mullvad_after == 0) {
-            if (mullvad)
-                mullvad->close();
-            mullvad = factory.make_mullvad();
-            if (!mullvad->is_connected()) {
-                spdlog::error("Mullvad isn't connected");
-                return EXIT_FAILURE;
+    try {
+        for (auto wrapped_video: video_manager) {
+            if (counter++ % cli.switch_mullvad_after == 0) {
+                if (mullvad)
+                    mullvad->close();
+                mullvad = factory.make_mullvad();
+                if (!mullvad->is_connected()) {
+                    spdlog::error("Mullvad isn't connected");
+                    return EXIT_FAILURE;
+                }
+                auto aim = session.am_i_mullvad();
+                if (!aim.is_mullvad) {
+                    spdlog::error("We aren't mullvad!!");
+                    return EXIT_FAILURE;
+                }
+                spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
             }
-            auto aim = session.am_i_mullvad();
-            if (!aim.is_mullvad) {
-                spdlog::error("We aren't mullvad!!");
-                return EXIT_FAILURE;
-            }
-            spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
+
+            session.download_video(cli.video_dir, wrapped_video.get_video());
+            wrapped_video.mark_done();
+
+            if (should_shutdown)
+                break;
         }
-
-        session.download_video(cli.video_dir, wrapped_video.get_video());
-        wrapped_video.mark_done();
-
-        if (should_shutdown)
-            break;
+    } catch (const std::exception &e) {
+        spdlog::error("Encountered unhandled error: {}", e.what());
     }
 
     spdlog::info("Downloaded {} tasks this run.", counter);
