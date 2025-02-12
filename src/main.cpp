@@ -65,13 +65,15 @@ int main(int argc, char *argv[]) {
         spdlog::info("Speedlimit is set to unlimited");
 
     size_t counter = 0;
+    const size_t MAX_ERR = 3;
 
     // The videomanager will autosave
     auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json").into_filtered();
     try {
         for (auto wrapped_video: video_manager) {
             if (counter++ % cli.switch_mullvad_after == 0) {
-                const size_t MAX_ERR = 3;
+
+                bool is_err;
                 for (size_t err_count = 0; err_count < MAX_ERR; err_count++) {
                     if (mullvad)
                         mullvad->close();
@@ -87,14 +89,35 @@ int main(int argc, char *argv[]) {
                             return EXIT_FAILURE;
                         }
                         spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
+                        is_err = false;
                         break;
                     } catch (const std::exception &e) {
                         spdlog::error("Failed to check mullvad ({}/{}) with error: {}", err_count, MAX_ERR, e.what());
+                        is_err = true;
                     }
+                }
+                if (is_err) {
+                    spdlog::error("Failed to check mullvad ({}/{})", MAX_ERR, MAX_ERR);
+                    break;
                 }
             }
 
-            session.download_video(cli.video_dir, wrapped_video.get_video());
+            bool is_err;
+            for (size_t err_count = 0; err_count < MAX_ERR; err_count++) {
+                try {
+                    session.download_video(cli.video_dir, wrapped_video.get_video());
+                    is_err = false;
+                    break;
+                } catch (const std::exception &e) {
+                    spdlog::error("Failed to get video ({}/{}) with error: {}", err_count, MAX_ERR, e.what());
+                    is_err = true;
+                }
+            }
+            if (is_err) {
+                spdlog::error("Failed to get video ({}/{})", MAX_ERR, MAX_ERR);
+                break;
+            }
+
             wrapped_video.mark_done();
 
             if (should_shutdown)
