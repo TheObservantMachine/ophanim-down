@@ -15,10 +15,8 @@ cmake_policy(SET CMP0077 NEW)  # Honor COMPILE_LANGUAGE for target_sources()
 include(CheckIncludeFileCXX)
 check_include_file_cxx("format" HAS_STD_FORMAT)
 if(NOT HAS_STD_FORMAT)
-  message(STATUS "<format> header not found; using libfmt as a fallback")
+  message(STATUS "Using libfmt as a fallback for <format>")
   find_package(fmt REQUIRED)
-else()
-  message(STATUS "Compiler supports <format>")
 endif()
 
 
