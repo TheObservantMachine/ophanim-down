@@ -9,12 +9,7 @@ MullvadWireGuard::MullvadWireGuard(std::string config_file) :
     start();
 }
 
-MullvadWireGuard::~MullvadWireGuard() {
-    bool connected = is_connected();
-    spdlog::debug("In MullvadWireGuard destrucor. Is connected = {}", connected ? "true" : "false");
-    if (connected)
-        close();
-}
+MullvadWireGuard::~MullvadWireGuard() { close(); }
 
 void MullvadWireGuard::start() {
     spdlog::info("Starting WireGuard connection...");
@@ -32,6 +27,9 @@ void MullvadWireGuard::start() {
 }
 
 void MullvadWireGuard::close() {
+    if (!m_is_connected)
+        return;
+
     spdlog::info("Stopping WireGuard connection...");
     try {
         execute_command("wg-quick down " + m_config_file);
