@@ -3,11 +3,11 @@
 #include "../constants.hpp"
 #include "../video.hpp"
 
-#include "../format.hpp"
 #include "curl/easy.h"
 #include "spdlog/spdlog.h"
 
 #include <algorithm>
+#include "../format.hpp"
 
 namespace vpn {
 
@@ -17,6 +17,7 @@ MullvadSession::MullvadSession(bool proxy_enabled, int32_t max_speed_mib_ps) :
     m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_max_speed(mib_to_bytes(max_speed_mib_ps)) {
     if (!m_curl)
         throw std::runtime_error("Failed to initialize CURL");
+    set_user_agent();
     enable_proxy(proxy_enabled);
 }
 
@@ -42,6 +43,34 @@ size_t write_string_callback(void *contents, size_t size, size_t nmemb, void *us
     size_t total_size = size * nmemb;
     response->append(static_cast<char *>(contents), total_size);
     return total_size;
+}
+
+std::string parse_firefox_version(const std::string_view html) {
+    for (size_t line_start = 0, line_end = html.find('\n'); line_end != std::string::npos;
+         line_start = line_end + 1, line_end = html.find('\n', line_start)) {
+        std::string_view line = html.substr(line_start, line_end - line_start);
+
+        if (line.find("<strong>") == std::string::npos)
+            continue;
+        size_t release_notes = line.find("releasenotes");
+        if (release_notes == std::string::npos)
+            continue;
+        size_t ver_start = line.find('>', release_notes);
+        if (ver_start++ == std::string::npos)
+            continue;
+        size_t ver_end = line.find('<', ver_start);
+        if (ver_end == std::string::npos)
+            continue;
+        return std::string(line.substr(ver_start, ver_end - ver_start));
+    }
+
+    throw std::runtime_error("Failed to parse firefox version number");
+}
+void MullvadSession::set_user_agent() {
+    const auto firefox_version = parse_firefox_version(get("https://www.mozilla.org/en-US/firefox/releases/"));
+    spdlog::info("Using useragent for Firefox {}", firefox_version);
+    m_user_agent = std::format("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}) Gecko/20100101 Firefox/{}",
+                               firefox_version, firefox_version);
 }
 
 std::string MullvadSession::get(const char *url) {
@@ -100,6 +129,7 @@ AmIMullvad MullvadSession::am_i_mullvad() {
 
     return result;
 }
+
 void MullvadSession::download_video(const std::filesystem::path &save_dir, const Video &video) {
     size_t pos = video.link.rfind('/');
     if (pos == std::string::npos)
@@ -125,6 +155,7 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     curl_easy_setopt(m_curl, CURLOPT_URL, video.link.c_str());
     // Use fwrite to write directly to the file.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, fwrite);
+    curl_easy_setopt(m_curl, CURLOPT_USERAGENT, m_user_agent.c_str());
     curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, fp);
     curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 1L);
@@ -143,7 +174,7 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     double elapsed_seconds = std::chrono::duration<double>(elapsed_time).count();
     double downloaded_mib = static_cast<double>(bytes_downloaded) / (1024.0 * 1024.0);
     double average_speed_mib_ps = (elapsed_seconds > 0.0) ? downloaded_mib / elapsed_seconds : 0.0;
-    spdlog::info("Downloaded {:.2f} MB @ ~{:.2f} Mib/s",downloaded_mib, average_speed_mib_ps * 8);
+    spdlog::info("Downloaded {:.2f} MB @ ~{:.2f} Mib/s", downloaded_mib, average_speed_mib_ps * 8);
 
     long http_code = 0;
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);

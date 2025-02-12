@@ -39,13 +39,15 @@ public:
     void set_max_speed_mib_ps(int32_t mbps);
     /** Get max download speed in MiB/s. 0 means disabled */
     int32_t get_max_speed_mib_ps() const;
-
+private:
+    void set_user_agent();
 private:
     CURL *m_curl;
     bool m_is_proxy_enabled;
     std::string m_proxy;
     /** Max speed in bytes/s. 0 Is diasabled */
     curl_off_t m_max_speed;
+    std::string m_user_agent;
 };
 
 } // namespace vpn
