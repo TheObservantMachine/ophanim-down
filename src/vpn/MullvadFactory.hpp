@@ -1,7 +1,7 @@
 #pragma once
 
-
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -16,7 +16,7 @@ public:
 
     ~MullvadFactory();
 
-    [[nodiscard]] std::unique_ptr<MullvadWireGuard> make_mullvad(int config_index = -1) const;
+    [[nodiscard]] std::unique_ptr<MullvadWireGuard> make_mullvad(int32_t config_index = -1);
 
     static std::string invalid_environment();
 
@@ -35,6 +35,8 @@ private:
     static bool command_exists(const std::string &cmd);
 
     [[nodiscard]] std::string find_zip_path() const;
+
+    std::mt19937 m_random_engine;
 };
 
 } // namespace vpn

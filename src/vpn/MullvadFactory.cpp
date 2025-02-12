@@ -1,17 +1,18 @@
 #include "MullvadFactory.hpp"
+
 #include "../constants.hpp"
 #include "mullvad_wireguard.hpp"
 
 #include <filesystem>
 #include <fstream>
-#include <utility>
 #include "../format.hpp"
 
 
 namespace vpn {
 
+
 MullvadFactory::MullvadFactory(const std::string &zip_path, std::string config_prefix) :
-    m_config_prefix(std::move(config_prefix)) {
+    m_config_prefix(std::move(config_prefix)), m_random_engine(std::random_device{}()) {
     m_zip_path = zip_path.empty() ? find_zip_path() : zip_path;
     m_temp_dir = create_temp_dir();
     extract_zip();
@@ -22,12 +23,14 @@ MullvadFactory::~MullvadFactory() {
         std::filesystem::remove_all(m_temp_dir);
 }
 
-std::unique_ptr<MullvadWireGuard> MullvadFactory::make_mullvad(int config_index) const {
+std::unique_ptr<MullvadWireGuard> MullvadFactory::make_mullvad(int32_t config_index) {
     if (m_config_files.empty())
         throw std::runtime_error("No config files available");
 
-    if (config_index == -1)
-        config_index = rand() % m_config_files.size();
+    if (config_index == -1) {
+        std::uniform_int_distribution<std::mt19937::result_type> random_index(0, m_config_files.size());
+        config_index = random_index(m_random_engine);
+    }
 
     if (static_cast<size_t>(config_index) >= m_config_files.size())
         throw std::out_of_range("Invalid config index");

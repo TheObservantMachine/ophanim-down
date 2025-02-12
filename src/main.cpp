@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("Opened database successfully");
 
-    const vpn::MullvadFactory factory(cli.mullvad_zip);
+    vpn::MullvadFactory factory(cli.mullvad_zip);
     std::unique_ptr<vpn::MullvadWireGuard> mullvad;
     vpn::MullvadSession session;
     std::string real_ip;
