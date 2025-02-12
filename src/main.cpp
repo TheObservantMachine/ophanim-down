@@ -2,6 +2,7 @@
 #include <chrono>
 #include <csignal>
 #include <iostream>
+#include <thread>
 
 #include "spdlog/spdlog.h"
 #include "sqlite3.h"
