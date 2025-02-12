@@ -24,6 +24,7 @@ VideoManager VideoManager::into_filtered() const {
         if (!downloaded_ids.contains(v.id))
             filtered.push_back(v);
     }
+    spdlog::info("Filtered out {} already downloaded entries.", filtered.size());
     return {m_save_path, m_downloaded_videos, filtered};
 }
 

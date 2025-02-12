@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     size_t counter = 0;
 
     // The videomanager will autosave
-    auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
+    auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json").into_filtered();
     try {
         for (auto wrapped_video: video_manager) {
             if (counter++ % cli.switch_mullvad_after == 0) {
