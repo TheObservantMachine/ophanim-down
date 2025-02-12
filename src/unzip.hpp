@@ -3,4 +3,4 @@
 #include <filesystem>
 #include <vector>
 
-std::vector<std::filesystem::path> unzip(std::filesystem::path zip_file, std::filesystem::path to_dir);
+std::vector<std::filesystem::path> unzip(const std::filesystem::path &zip_file, const std::filesystem::path &to_dir);

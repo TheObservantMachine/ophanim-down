@@ -8,7 +8,7 @@
 
 #include "zip.h"
 
-std::vector<std::filesystem::path> unzip(std::filesystem::path zip_file, std::filesystem::path to_dir) {
+std::vector<std::filesystem::path> unzip(const std::filesystem::path &zip_file, const std::filesystem::path &to_dir) {
     int err_code = 0;
     std::unique_ptr<zip, decltype(&zip_close)> archive(zip_open(zip_file.c_str(), ZIP_RDONLY, &err_code), zip_close);
     if (!archive) {

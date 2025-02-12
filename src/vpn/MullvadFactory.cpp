@@ -3,10 +3,12 @@
 #include "../constants.hpp"
 #include "mullvad_wireguard.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <ranges>
 #include "../format.hpp"
-
+#include "../unzip.hpp"
 
 namespace vpn {
 
@@ -44,16 +46,14 @@ std::string MullvadFactory::invalid_environment() {
 }
 
 void MullvadFactory::extract_zip() {
-    std::string cmd = "unzip -o " + m_zip_path + " -d " + m_temp_dir;
-    if (system(cmd.c_str()) != 0)
-        throw std::runtime_error("Failed to extract ZIP");
+    auto unzipped_files = unzip(m_zip_path, m_temp_dir);
 
-    for (const auto &entry: std::filesystem::directory_iterator(m_temp_dir)) {
-        if (entry.path().extension() == ".conf") {
-            std::string config_path = entry.path();
-            modify_allowed_ips(config_path);
-            m_config_files.push_back(config_path);
-        }
+    for (auto &path: unzipped_files) {
+        if (path.extension() != ".conf")
+            continue;
+
+        modify_allowed_ips(path);
+        m_config_files.push_back(std::move(path));
     }
 }
 
