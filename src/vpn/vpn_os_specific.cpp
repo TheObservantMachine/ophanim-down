@@ -30,6 +30,24 @@ public:
     }
 };
 
-std::unique_ptr<VpnOsSpecific> get_vpn_os_specific() { return std::make_unique<LinuxVpnOsSpecific>(); }
+class MacVpnOsSpecific final : public VpnOsSpecific {
+public:
+    [[nodiscard]] bool is_connected(const std::string &interface_name) const override {
+        const std::string ret = exec("netstat -rn -f inet");
+        return ret.find("tun") != std::string::npos;
+    }
+};
+
+std::unique_ptr<VpnOsSpecific> get_vpn_os_specific() {
+    return std::make_unique<
+#if defined(__linux__)
+            LinuxVpnOsSpecific
+#elif defined(__APPLE__)
+            MacVpnOsSpecific
+#else
+#error UNSUPPORTED_OS
+#endif
+            >();
+}
 
 } // namespace vpn
