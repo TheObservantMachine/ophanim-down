@@ -11,7 +11,7 @@
 
 namespace vpn {
 
-MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_proxy(nullptr) {
+MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_proxy() {
     if (!m_curl)
         throw std::runtime_error("Failed to initialize CURL");
 }
