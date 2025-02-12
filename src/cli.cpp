@@ -2,11 +2,11 @@
 
 #include <cstdlib>
 #include <filesystem>
-#include "format.hpp"
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include "format.hpp"
 
 // A simple helper to check if a string starts with a given pattern.
 bool starts_with(std::string_view s, std::string_view pattern) {

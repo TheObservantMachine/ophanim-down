@@ -9,28 +9,28 @@
 
 
 MullvadFactory::MullvadFactory(const std::string &zip_path, std::string config_prefix) :
-    config_prefix_(std::move(config_prefix)) {
-    zip_path_ = zip_path.empty() ? find_zip_path() : zip_path;
-    temp_dir_ = create_temp_dir();
+    m_config_prefix(std::move(config_prefix)) {
+    m_zip_path = zip_path.empty() ? find_zip_path() : zip_path;
+    m_temp_dir = create_temp_dir();
     extract_zip();
 }
 
 MullvadFactory::~MullvadFactory() {
-    if (!temp_dir_.empty())
-        std::filesystem::remove_all(temp_dir_);
+    if (!m_temp_dir.empty())
+        std::filesystem::remove_all(m_temp_dir);
 }
 
 std::unique_ptr<MullvadWireGuard> MullvadFactory::make_mullvad(int config_index) const {
-    if (config_files_.empty())
+    if (m_config_files.empty())
         throw std::runtime_error("No config files available");
 
     if (config_index == -1)
-        config_index = rand() % config_files_.size();
+        config_index = rand() % m_config_files.size();
 
-    if (static_cast<size_t>(config_index) >= config_files_.size())
+    if (static_cast<size_t>(config_index) >= m_config_files.size())
         throw std::out_of_range("Invalid config index");
 
-    return std::make_unique<MullvadWireGuard>(config_files_[config_index]);
+    return std::make_unique<MullvadWireGuard>(m_config_files[config_index]);
 }
 
 std::string MullvadFactory::invalid_environment() {
@@ -40,15 +40,15 @@ std::string MullvadFactory::invalid_environment() {
 }
 
 void MullvadFactory::extract_zip() {
-    std::string cmd = "unzip -o " + zip_path_ + " -d " + temp_dir_;
+    std::string cmd = "unzip -o " + m_zip_path + " -d " + m_temp_dir;
     if (system(cmd.c_str()) != 0)
         throw std::runtime_error("Failed to extract ZIP");
 
-    for (const auto &entry: std::filesystem::directory_iterator(temp_dir_)) {
+    for (const auto &entry: std::filesystem::directory_iterator(m_temp_dir)) {
         if (entry.path().extension() == ".conf") {
             std::string config_path = entry.path().string();
             modify_allowed_ips(config_path);
-            config_files_.push_back(config_path);
+            m_config_files.push_back(config_path);
         }
     }
 }

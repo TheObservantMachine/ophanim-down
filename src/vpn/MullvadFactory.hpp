@@ -18,10 +18,10 @@ public:
     static std::string invalid_environment();
 
 private:
-    std::string zip_path_;
-    std::string config_prefix_;
-    std::string temp_dir_;
-    std::vector<std::string> config_files_;
+    std::string m_zip_path;
+    std::string m_config_prefix;
+    std::string m_temp_dir;
+    std::vector<std::string> m_config_files;
 
     void extract_zip();
 

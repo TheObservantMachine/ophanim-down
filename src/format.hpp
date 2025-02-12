@@ -1,8 +1,10 @@
 #ifndef __cpp_lib_format
-  #include <fmt/core.h>
-  namespace std {
-  using fmt::format;
-  }
+
+#include <fmt/core.h>
+namespace std {
+using fmt::format;
+}
+
 #else
-  #include <format>
+#include <format>
 #endif
