@@ -7,14 +7,23 @@
 
 namespace cli {
 
-class InvalidCommandException : public std::exception {
+// Base cli exception
+class CliExcpetion : public std::exception {};
+
+// Wrong argument, or failed parsing
+class InvalidCommandException : public CliExcpetion {
 public:
     InvalidCommandException(std::string msg) : m_msg(std::move(msg)) {}
-
     [[nodiscard]] const char *what() const noexcept override { return m_msg.c_str(); }
 
 private:
     std::string m_msg;
+};
+
+// The argument was help: We should exit now
+class HelpExcpetion : public CliExcpetion {
+public:
+    HelpExcpetion() {}
 };
 
 class Cli {

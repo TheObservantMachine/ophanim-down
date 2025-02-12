@@ -70,7 +70,7 @@ cli::Cli cli::parse_cli(int argc, char *argv[]) {
 
         if (arg == "-h" || arg == "--help") {
             show_help();
-            std::exit(0);
+            throw HelpExcpetion();
         } else if (arg == "--db-path" || arg == "-p") {
             if (++i >= argc)
                 throw InvalidCommandException("Missing value for " + std::string(arg));

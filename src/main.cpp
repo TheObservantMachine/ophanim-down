@@ -17,6 +17,8 @@ int main(int argc, char *argv[]) {
     } catch (const cli::InvalidCommandException &e) {
         std::cerr << "Invalid parameters. Use (--help | -h) for help:\n " << e.what() << std::endl;
         return EXIT_FAILURE;
+    } catch (const cli::HelpExcpetion &_) {
+        return EXIT_SUCCESS;
     }
 
     setup_logging();
