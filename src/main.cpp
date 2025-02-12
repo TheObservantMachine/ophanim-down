@@ -1,4 +1,7 @@
+#include <atomic>
+#include <csignal>
 #include <iostream>
+
 #include "spdlog/spdlog.h"
 #include "sqlite3.h"
 
@@ -8,6 +11,15 @@
 #include "vpn/MullvadFactory.hpp"
 #include "vpn/mullvad_session.hpp"
 #include "vpn/mullvad_wireguard.hpp"
+
+
+static std::atomic<bool> should_shutdown = false;
+void signal_handler(int signal) {
+    if (signal != SIGINT)
+        return;
+    should_shutdown = true;
+    spdlog::info("Shutting down, when done!");
+}
 
 
 int main(int argc, char *argv[]) {
@@ -20,6 +32,7 @@ int main(int argc, char *argv[]) {
     } catch (const cli::HelpExcpetion &_) {
         return EXIT_SUCCESS;
     }
+    std::signal(SIGINT, signal_handler);
 
     setup_logging();
 
@@ -66,5 +79,9 @@ int main(int argc, char *argv[]) {
 
         session.download_video(cli.video_dir, wrapped_video.get_video());
         wrapped_video.mark_done();
+
+        if (should_shutdown) break;
     }
+
+    spdlog::info("Downloaded {} tasks this run.", counter);
 }
