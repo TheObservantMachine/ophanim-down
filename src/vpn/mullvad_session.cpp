@@ -135,13 +135,14 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
 bool AmIMullvad::parse_server_config(const std::string_view line) {
     // Extract the server configuration between parentheses.
     size_t start = line.find('(');
-    if (start != std::string::npos)
+    if (start == std::string::npos)
         return false;
     start++; // move past '('
     size_t end = line.find(')', start);
-    if (end != std::string::npos)
-        server_config = line.substr(start, end - start);
-
+    if (end == std::string::npos)
+        return false;
+    
+    server_config = line.substr(start, end - start);
     return true;
 }
 
