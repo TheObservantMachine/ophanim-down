@@ -7,6 +7,7 @@
 #include "curl/easy.h"
 #include "spdlog/spdlog.h"
 
+#include <algorithm>
 
 namespace vpn {
 
@@ -74,39 +75,21 @@ AmIMullvad MullvadSession::am_i_mullvad() {
 
     AmIMullvad result;
     std::istringstream stream(response);
-    std::string line;
+    std::string line, lower;
 
     // Process the response line by line.
     while (std::getline(stream, line)) {
+        lower.clear();
+        std::ranges::transform(line, lower.begin(), ::tolower);
+
         // Check for Mullvad connection status.
-        if (line.find("You are using Mullvad VPN") != std::string::npos) {
+        if (lower.find("you are using mullvad vpn") != std::string::npos) {
             result.is_mullvad = true;
-            // Extract the server configuration between parentheses.
-            size_t start = line.find('(');
-            if (start != std::string::npos) {
-                start++; // move past '('
-                size_t end = line.find(')', start);
-                if (end != std::string::npos)
-                    result.server_config = line.substr(start, end - start);
-            }
-        } else if (line.find("You are not using Mullvad VPN") != std::string::npos) {
+            result.parse_server_config(line);
+        } else if (lower.find("you are not using mullvad vpn") != std::string::npos)
             result.is_mullvad = false;
-        }
-        // Check for IP address and location.
-        else if (line.find("IP address:") != std::string::npos) {
-            size_t colonPos = line.find(":");
-            if (colonPos != std::string::npos) {
-                // Skip the colon and following space.
-                size_t ipStart = colonPos + 2;
-                size_t commaPos = line.find(",", ipStart);
-                if (commaPos != std::string::npos) {
-                    result.ip_address = line.substr(ipStart, commaPos - ipStart);
-                    // The location is assumed to follow the comma and a space.
-                    size_t locationStart = commaPos + 2;
-                    result.location = line.substr(locationStart);
-                }
-            }
-        }
+        else if (lower.find("ip address:") != std::string::npos)
+            result.parse_ip_address_location(line);
     }
 
     if (result.ip_address.empty())
@@ -151,6 +134,37 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);
     if (http_code != 200)
         throw InvalidStatusCode("Download failed with HTTP code: " + std::to_string(http_code));
+}
+
+bool AmIMullvad::parse_server_config(const std::string_view line) {
+    // Extract the server configuration between parentheses.
+    size_t start = line.find('(');
+    if (start != std::string::npos)
+        return false;
+    start++; // move past '('
+    size_t end = line.find(')', start);
+    if (end != std::string::npos)
+        server_config = line.substr(start, end - start);
+
+    return true;
+}
+
+bool AmIMullvad::parse_ip_address_location(const std::string_view line) {
+    size_t colonPos = line.find(":");
+    if (colonPos == std::string::npos)
+        return false;
+
+    // Skip the colon and following space.
+    size_t ipStart = colonPos + 2;
+    size_t commaPos = line.find(",", ipStart);
+    if (commaPos == std::string::npos)
+        return false;
+
+    ip_address = line.substr(ipStart, commaPos - ipStart);
+    // The location is assumed to follow the comma and a space.
+    size_t locationStart = commaPos + 2;
+    location = line.substr(locationStart);
+    return true;
 }
 
 } // namespace vpn

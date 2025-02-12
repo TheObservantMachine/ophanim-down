@@ -20,6 +20,10 @@ public:
 struct AmIMullvad {
     bool is_mullvad = false;
     std::string ip_address, server_config, location;
+
+public:
+    bool parse_server_config(const std::string_view line);
+    bool parse_ip_address_location(const std::string_view line);
 };
 
 class MullvadSession {
