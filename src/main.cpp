@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
     // The videomanager will autosave
     auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
-    for (auto wrapped: video_manager) {
+    for (auto wrapped_video: video_manager) {
         if (counter++ % cli.switch_mullvad_after == 0) {
             mullvad = factory.make_mullvad();
             if (!mullvad->is_connected()) {
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
             spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
         }
 
-        auto &video = wrapped.get_video();
-        session.download_video(cli.video_dir, video);
+        session.download_video(cli.video_dir, wrapped_video.get_video());
+        wrapped_video.mark_done();
     }
 }
