@@ -45,23 +45,22 @@ std::string MullvadSession::get(const char *url) {
     curl_easy_setopt(m_curl, CURLOPT_URL, url);
 
     std::string response_text;
-    std::string error_buffer(CURL_ERROR_SIZE, '\0');
+    char error_buffer[CURL_ERROR_SIZE] = {0};
 
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, write_string_callback);
     curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &response_text);
-    curl_easy_setopt(m_curl, CURLOPT_ERRORBUFFER, error_buffer.data());
+    curl_easy_setopt(m_curl, CURLOPT_ERRORBUFFER, error_buffer);
     curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 1L);
 
     CURLcode res = curl_easy_perform(m_curl);
 
     if (res != CURLE_OK) {
-        if (error_buffer.empty())
-            error_buffer = curl_easy_strerror(res);
-        throw InvalidStatusCode(error_buffer);
+        std::string err_msg = (error_buffer[0] != '\0') ? error_buffer : curl_easy_strerror(res);
+        throw InvalidStatusCode(err_msg);
     }
 
-    int status_code;
+    long status_code;
     curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &status_code);
     spdlog::debug("Got status code {} for {}", status_code, url);
     return response_text;
