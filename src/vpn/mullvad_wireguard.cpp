@@ -3,9 +3,8 @@
 
 namespace vpn {
 
-MullvadWireGuard::MullvadWireGuard(std::string config_file) :
-    m_is_connected(false), m_config_file(std::move(config_file)), m_interface_name(get_interface_name(config_file)),
-    m_vpn_os_specific(get_vpn_os_specific()) {
+MullvadWireGuard::MullvadWireGuard(std::filesystem::path config_file) :
+    m_is_connected(false), m_config_file(std::move(config_file)), m_vpn_os_specific(get_vpn_os_specific()) {
     start();
 }
 
@@ -13,7 +12,7 @@ MullvadWireGuard::~MullvadWireGuard() { close(); }
 
 void MullvadWireGuard::start() {
     spdlog::info("Starting WireGuard connection...");
-    execute_command("wg-quick up " + m_config_file);
+    execute_command("wg-quick up " + m_config_file.string());
     int counter = 0;
     while (!is_connected()) {
         if (++counter > 10) {
@@ -32,20 +31,16 @@ void MullvadWireGuard::close() {
 
     spdlog::info("Stopping WireGuard connection...");
     try {
-        execute_command("wg-quick down " + m_config_file);
+        execute_command("wg-quick down " + m_config_file.string());
         m_is_connected = false;
     } catch (const std::exception &e) {
         spdlog::error(e.what());
     }
 }
 
-bool MullvadWireGuard::is_connected() const { return m_vpn_os_specific->is_connected(m_interface_name); }
+bool MullvadWireGuard::is_connected() const { return m_vpn_os_specific->is_connected(get_interface_name()); }
 
-
-std::string MullvadWireGuard::get_interface_name(const std::string &path) {
-    const std::filesystem::path p(path);
-    return p.stem().string();
-}
+std::string MullvadWireGuard::get_interface_name() const { return m_config_file.stem().string(); }
 
 void MullvadWireGuard::execute_command(const std::string &cmd) {
     spdlog::debug("Executing: " + cmd);

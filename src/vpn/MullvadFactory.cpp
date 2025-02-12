@@ -10,10 +10,9 @@
 
 namespace vpn {
 
-
-MullvadFactory::MullvadFactory(const std::string &zip_path, std::string config_prefix) :
+MullvadFactory::MullvadFactory(std::filesystem::path zip_path, std::string config_prefix) :
     m_config_prefix(std::move(config_prefix)), m_random_engine(std::random_device{}()) {
-    m_zip_path = zip_path.empty() ? find_zip_path() : zip_path;
+    m_zip_path = zip_path.empty() ? find_zip_path() : std::move(zip_path);
     m_temp_dir = create_temp_dir();
     extract_zip();
 }
@@ -51,14 +50,14 @@ void MullvadFactory::extract_zip() {
 
     for (const auto &entry: std::filesystem::directory_iterator(m_temp_dir)) {
         if (entry.path().extension() == ".conf") {
-            std::string config_path = entry.path().string();
+            std::string config_path = entry.path();
             modify_allowed_ips(config_path);
             m_config_files.push_back(config_path);
         }
     }
 }
 
-void MullvadFactory::modify_allowed_ips(const std::string &config_path) {
+void MullvadFactory::modify_allowed_ips(const std::filesystem::path &config_path) {
     std::vector<std::string> lines;
     std::string current_section;
     std::ifstream in(config_path);
@@ -96,10 +95,10 @@ bool MullvadFactory::command_exists(const std::string &cmd) {
     return system(("command -v " + cmd + " >/dev/null 2>&1").c_str()) == 0;
 }
 
-std::string MullvadFactory::find_zip_path() const {
+std::filesystem::path MullvadFactory::find_zip_path() const {
     for (const auto &entry: std::filesystem::directory_iterator(".")) {
         if (entry.path().string().find("mullvad_wireguard") != std::string::npos && entry.path().extension() == ".zip")
-            return entry.path().string();
+            return entry.path();
     }
     throw std::runtime_error("Mullvad ZIP not found");
 }
