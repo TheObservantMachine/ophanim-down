@@ -71,19 +71,27 @@ int main(int argc, char *argv[]) {
     try {
         for (auto wrapped_video: video_manager) {
             if (counter++ % cli.switch_mullvad_after == 0) {
-                if (mullvad)
-                    mullvad->close();
-                mullvad = factory.make_mullvad();
-                if (!mullvad->is_connected()) {
-                    spdlog::error("Mullvad isn't connected");
-                    return EXIT_FAILURE;
+                const size_t MAX_ERR = 3;
+                for (size_t err_count = 0; err_count < MAX_ERR; err_count++) {
+                    if (mullvad)
+                        mullvad->close();
+                    mullvad = factory.make_mullvad();
+                    if (!mullvad->is_connected()) {
+                        spdlog::error("Mullvad isn't connected");
+                        return EXIT_FAILURE;
+                    }
+                    try {
+                        auto aim = session.am_i_mullvad();
+                        if (!aim.is_mullvad) {
+                            spdlog::error("We aren't mullvad!!");
+                            return EXIT_FAILURE;
+                        }
+                        spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
+                        break;
+                    } catch (const std::exception &e) {
+                        spdlog::error("Failed to check mullvad ({}/{}) with error: {}", err_count, MAX_ERR, e.what());
+                    }
                 }
-                auto aim = session.am_i_mullvad();
-                if (!aim.is_mullvad) {
-                    spdlog::error("We aren't mullvad!!");
-                    return EXIT_FAILURE;
-                }
-                spdlog::info("Connected at {} with ip {}", aim.location, aim.ip_address);
             }
 
             session.download_video(cli.video_dir, wrapped_video.get_video());
