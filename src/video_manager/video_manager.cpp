@@ -6,6 +6,7 @@
 
 #include "sqlite3.h"
 
+namespace manager {
 
 VideoManager::VideoManager(std::filesystem::path save_path, DownloadedVideos downloaded_videos,
                            const std::vector<Video> &to_download) :
@@ -58,3 +59,5 @@ VideoManager VideoManager::create(sqlite3 *db, const std::filesystem::path &save
 void VideoManager::save() const { m_downloaded_videos.save(m_save_path); }
 
 std::size_t VideoManager::len() const { return m_downloaded_videos.get_ids().size(); }
+
+} // namespace manager

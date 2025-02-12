@@ -8,6 +8,8 @@
 
 class Video;
 
+namespace vpn {
+
 class InvalidStatusCode final : public std::runtime_error {
 public:
     explicit InvalidStatusCode(const std::string &s) : runtime_error(s) {}
@@ -35,3 +37,5 @@ private:
     bool m_is_proxy_enabled;
     const char *m_proxy;
 };
+
+} // namespace vpn

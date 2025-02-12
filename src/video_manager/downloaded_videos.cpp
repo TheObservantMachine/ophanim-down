@@ -5,6 +5,7 @@
 #include "nlohmann/json.hpp"
 #include "spdlog/spdlog.h"
 
+namespace manager {
 
 DownloadedVideos::DownloadedVideos(std::vector<int64_t> ids) : m_downloaded_ids(std::move(ids)) {}
 
@@ -50,3 +51,5 @@ void DownloadedVideos::save(const std::filesystem::path &path) const {
 void DownloadedVideos::add_id(const int64_t id) { m_downloaded_ids.push_back(id); }
 
 const std::vector<int64_t> &DownloadedVideos::get_ids() const { return m_downloaded_ids; }
+
+} // namespace manager

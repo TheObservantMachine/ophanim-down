@@ -19,9 +19,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-
     setup_logging();
-
 
     sqlite3 *db = nullptr;
     spdlog::debug("Opening database at {}", cli.db_path.string());
@@ -31,9 +29,9 @@ int main(int argc, char *argv[]) {
     }
     spdlog::debug("Opened database successfully");
 
-    const MullvadFactory factory(cli.mullvad_zip);
-    std::unique_ptr<MullvadWireGuard> mullvad;
-    MullvadSession session;
+    const vpn::MullvadFactory factory(cli.mullvad_zip);
+    std::unique_ptr<vpn::MullvadWireGuard> mullvad;
+    vpn::MullvadSession session;
     std::string real_ip;
     {
         auto aim = session.am_i_mullvad();
@@ -48,7 +46,7 @@ int main(int argc, char *argv[]) {
     size_t counter = 0;
 
     // The videomanager will autosave
-    auto video_manager = VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
+    auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json");
     for (auto wrapped: video_manager) {
         if (++counter % cli.switch_mullvad_after == 0) {
             mullvad = factory.make_mullvad();

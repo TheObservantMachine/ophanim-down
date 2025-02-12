@@ -1,5 +1,7 @@
 #include "vpn_os_specific.hpp"
 
+namespace vpn {
+
 class LinuxVpnOsSpecific final : public VpnOsSpecific {
 public:
     [[nodiscard]] bool is_connected(const std::string &interface_name) const override {
@@ -9,3 +11,5 @@ public:
 };
 
 std::unique_ptr<VpnOsSpecific> get_vpn_os_specific() { return std::make_unique<LinuxVpnOsSpecific>(); }
+
+} // namespace vpn

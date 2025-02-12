@@ -4,6 +4,8 @@
 #include <string>
 
 
+namespace vpn {
+
 class VpnOsSpecific {
 public:
     [[nodiscard]] virtual bool is_connected(const std::string &interface_name) const = 0;
@@ -11,3 +13,5 @@ public:
 };
 
 std::unique_ptr<VpnOsSpecific> get_vpn_os_specific();
+
+} // namespace vpn

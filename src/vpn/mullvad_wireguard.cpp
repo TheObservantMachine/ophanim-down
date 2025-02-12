@@ -1,6 +1,7 @@
 #include "mullvad_wireguard.hpp"
 #include "spdlog/spdlog.h"
 
+namespace vpn {
 
 MullvadWireGuard::MullvadWireGuard(std::string config_file) :
     m_is_connected(false), m_config_file(std::move(config_file)), m_interface_name(get_interface_name(config_file)),
@@ -62,3 +63,5 @@ void MullvadWireGuard::execute_command(const std::string &cmd) {
     if (WEXITSTATUS(status) != 0)
         throw std::runtime_error("Command failed: " + result);
 }
+
+} // namespace vpn

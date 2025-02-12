@@ -3,10 +3,12 @@
 #include "mullvad_wireguard.hpp"
 
 #include <filesystem>
-#include "../format.hpp"
 #include <fstream>
 #include <utility>
+#include "../format.hpp"
 
+
+namespace vpn {
 
 MullvadFactory::MullvadFactory(const std::string &zip_path, std::string config_prefix) :
     m_config_prefix(std::move(config_prefix)) {
@@ -98,3 +100,5 @@ std::string MullvadFactory::find_zip_path() const {
     }
     throw std::runtime_error("Mullvad ZIP not found");
 }
+
+} // namespace vpn

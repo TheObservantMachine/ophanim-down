@@ -2,10 +2,11 @@
 
 #include <vector>
 
-#include "downloaded_videos.hpp"
 #include "../video.hpp"
+#include "downloaded_videos.hpp"
 #include "video_iterator.hpp"
 
+namespace manager {
 
 class VideoIterable {
 public:
@@ -18,3 +19,5 @@ private:
     const std::vector<Video> &m_videos;
     DownloadedVideos &m_downloaded_videos;
 };
+
+} // namespace manager

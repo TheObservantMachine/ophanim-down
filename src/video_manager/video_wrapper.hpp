@@ -3,6 +3,8 @@
 #include "../video.hpp"
 #include "downloaded_videos.hpp"
 
+namespace manager {
+
 class VideoWrapper {
 public:
     VideoWrapper(const Video &video, DownloadedVideos &downloaded_videos);
@@ -15,3 +17,5 @@ private:
     const Video &m_video;
     DownloadedVideos &m_downloaded_videos;
 };
+
+} // namespace manager

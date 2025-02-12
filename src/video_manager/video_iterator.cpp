@@ -1,6 +1,8 @@
 #include "video_iterator.hpp"
 
 
+namespace manager {
+
 VideoIterator::VideoIterator(const std::vector<Video> &videos, const size_t pos, DownloadedVideos &downloaded_videos) :
     m_videos(videos), m_pos(pos), m_downloaded_videos(downloaded_videos) {}
 
@@ -22,3 +24,5 @@ bool VideoIterator::operator==(const VideoIterator &other) const {
 bool VideoIterator::operator!=(const VideoIterator &other) const { return !(*this == other); }
 
 VideoWrapper VideoIterator::operator*() const { return {m_videos[m_pos], m_downloaded_videos}; }
+
+} // namespace manager

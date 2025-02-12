@@ -8,6 +8,8 @@
 #include "spdlog/spdlog.h"
 
 
+namespace vpn {
+
 MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_proxy(nullptr) {
     if (!m_curl)
         throw std::runtime_error("Failed to initialize CURL");
@@ -150,3 +152,5 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     if (http_code != 200)
         throw InvalidStatusCode("Download failed with HTTP code: " + std::to_string(http_code));
 }
+
+} // namespace vpn

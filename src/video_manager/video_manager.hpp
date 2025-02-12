@@ -7,6 +7,8 @@
 
 class sqlite3;
 
+namespace manager {
+
 /**
  * VideoManager for keeping track of already downloaded IDS.
  * It will autosave upon destruction.
@@ -43,3 +45,5 @@ private:
     DownloadedVideos m_downloaded_videos;
     std::vector<Video> m_to_download;
 };
+
+} // namespace manager

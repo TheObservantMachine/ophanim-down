@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+
+namespace vpn {
+
 class MullvadWireGuard;
 
 class MullvadFactory {
@@ -33,3 +36,5 @@ private:
 
     [[nodiscard]] std::string find_zip_path() const;
 };
+
+} // namespace vpn

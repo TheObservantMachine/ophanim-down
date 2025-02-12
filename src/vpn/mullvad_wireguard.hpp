@@ -4,6 +4,8 @@
 
 #include <filesystem>
 
+namespace vpn {
+
 class MullvadWireGuard {
 public:
     MullvadWireGuard(std::string config_file);
@@ -26,3 +28,5 @@ private:
     std::string m_interface_name;
     std::unique_ptr<VpnOsSpecific> m_vpn_os_specific;
 };
+
+} // namespace vpn

@@ -3,10 +3,12 @@
 
 #include <vector>
 
-#include "downloaded_videos.hpp"
 #include "../video.hpp"
+#include "downloaded_videos.hpp"
 #include "video_wrapper.hpp"
 
+
+namespace manager {
 
 class VideoIterator {
 public:
@@ -34,3 +36,5 @@ private:
     size_t m_pos;
     DownloadedVideos &m_downloaded_videos;
 };
+
+} // namespace manager

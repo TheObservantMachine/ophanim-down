@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <vector>
 
+namespace manager {
 
 class DownloadedVideos {
 public:
@@ -18,3 +19,5 @@ public:
 private:
     std::vector<int64_t> m_downloaded_ids;
 };
+
+} // namespace manager
