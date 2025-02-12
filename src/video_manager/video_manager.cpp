@@ -20,11 +20,16 @@ VideoIterator VideoManager::end() { return {m_to_download, m_to_download.size(),
 VideoManager VideoManager::into_filtered() const {
     const std::unordered_set downloaded_ids(m_downloaded_videos.get_ids().begin(), m_downloaded_videos.get_ids().end());
     std::vector<Video> filtered;
+    size_t n_filtered_out = 0;
     for (const auto &v: m_to_download) {
-        if (!downloaded_ids.contains(v.id))
+        if (!downloaded_ids.contains(v.id)) {
             filtered.push_back(v);
+        } else {
+            n_filtered_out++;
+
+        }
     }
-    spdlog::info("Filtered out {} already downloaded entries.", filtered.size());
+    spdlog::info("Filtered out {} already downloaded entries.", n_filtered_out);
     return {m_save_path, m_downloaded_videos, filtered};
 }
 

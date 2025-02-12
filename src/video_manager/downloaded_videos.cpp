@@ -10,7 +10,7 @@ namespace manager {
 DownloadedVideos::DownloadedVideos(std::vector<int64_t> ids) : m_downloaded_ids(std::move(ids)) {}
 
 DownloadedVideos DownloadedVideos::load(const std::filesystem::path &path) {
-    if (!exists(path) || is_regular_file(path)) {
+    if (!exists(path) || !is_regular_file(path)) {
         spdlog::warn("DownloadedVideos: The file '{}' isn't valid. Will not load it.", path.string());
         return {};
     }
