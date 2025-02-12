@@ -24,6 +24,7 @@ find_package(CURL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_library(SQLITE3_LIBRARY sqlite3 REQUIRED)
+find_package(libzip REQUIRED)
 
 # Add executable
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/vpn/*.cpp" "src/video_manager/*.cpp")
@@ -36,6 +37,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         nlohmann_json::nlohmann_json
         ${SQLITE3_LIBRARY}
         CURL::libcurl
+        libzip::zip
 )
 
 # Link against libfmt if std::format isn’t available.
