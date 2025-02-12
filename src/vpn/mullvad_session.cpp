@@ -3,10 +3,9 @@
 #include "../constants.hpp"
 #include "../video.hpp"
 
+#include "../format.hpp"
 #include "curl/easy.h"
 #include "spdlog/spdlog.h"
-
-#include <format>
 
 
 MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(false), m_proxy(nullptr) {
@@ -130,7 +129,7 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
 
     // Reset the curl handle before the new transfer.
     curl_easy_reset(m_curl);
-    if(m_proxy)
+    if (m_proxy)
         curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
     curl_easy_setopt(m_curl, CURLOPT_URL, video.link.c_str());
     // Use fwrite to write directly to the file.
