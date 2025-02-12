@@ -11,10 +11,10 @@
 
 
 int main(int argc, char *argv[]) {
-    Cli cli;
+    cli::Cli cli;
     try {
-        cli = Cli::parse_cli(argc, argv);
-    } catch (const InvalidCommandException &e) {
+        cli = cli::parse_cli(argc, argv);
+    } catch (const cli::InvalidCommandException &e) {
         std::cerr << "Invalid parameters. Use (--help | -h) for help:\n " << e.what() << std::endl;
         return EXIT_FAILURE;
     }

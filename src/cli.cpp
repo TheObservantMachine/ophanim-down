@@ -37,7 +37,7 @@ public:
         if (!number_missing)
             return;
         const auto str = std::format("Missing required {} for: {}", option(), missing);
-        throw InvalidCommandException(str);
+        throw cli::InvalidCommandException(str);
     }
 
 private:
@@ -49,7 +49,7 @@ private:
 };
 
 //
-// Cli::parse_cli
+// cli::parse_cli
 //
 // Parses the command-line arguments for the following options:
 //
@@ -60,8 +60,8 @@ private:
 //   -s, --switch-mullvad-after <int> (optional, default: 10)
 //   -h, --help                     Show help message
 //
-Cli Cli::parse_cli(int argc, char *argv[]) {
-    Cli cli;
+cli::Cli cli::parse_cli(int argc, char *argv[]) {
+    cli::Cli cli;
     cli.switch_mullvad_after = 10;
 
     // Process each argument.
@@ -134,5 +134,4 @@ Options:
 // show_help
 //
 // Outputs the help message to standard error.
-//
-void Cli::show_help() { std::cerr << get_help() << std::flush; }
+void cli::show_help() { std::cerr << get_help() << std::flush; }

@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <string>
 
+namespace cli {
 
 class InvalidCommandException : public std::exception {
 public:
@@ -20,7 +21,9 @@ class Cli {
 public:
     std::filesystem::path db_path, video_dir, id_dir, mullvad_zip;
     int switch_mullvad_after;
-
-    static Cli parse_cli(int argc, char **argv);
-    static void show_help();
 };
+
+Cli parse_cli(int argc, char **argv);
+void show_help();
+
+} // namespace cli
