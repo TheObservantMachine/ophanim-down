@@ -39,7 +39,7 @@ public:
 private:
     CURL *m_curl;
     bool m_is_proxy_enabled;
-    const char *m_proxy;
+    std::string m_proxy;
 };
 
 } // namespace vpn

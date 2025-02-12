@@ -19,18 +19,15 @@ MullvadSession::MullvadSession() : m_curl(curl_easy_init()), m_is_proxy_enabled(
 MullvadSession::~MullvadSession() {
     if (m_curl)
         curl_easy_cleanup(m_curl);
-    delete[] m_proxy;
 }
 
 void MullvadSession::enable_proxy(bool enable) {
-    if (enable != (m_proxy == nullptr))
+    if (enable == m_is_proxy_enabled)
         return;
+    if (enable)
+        m_proxy = std::format("socks5h://{}", SOCKS5_IP);
 
-    if (enable) {
-        m_proxy = std::format("socks5h://{}", SOCKS5_IP).c_str();
-    } else {
-        delete[] m_proxy;
-    }
+    m_is_proxy_enabled = enable;
 }
 
 size_t write_string_callback(void *contents, size_t size, size_t nmemb, void *userdata) {
@@ -43,7 +40,7 @@ size_t write_string_callback(void *contents, size_t size, size_t nmemb, void *us
 std::string MullvadSession::get(const char *url) {
     curl_easy_reset(m_curl);
 
-    if (m_proxy)
+    if (m_is_proxy_enabled)
         curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
     curl_easy_setopt(m_curl, CURLOPT_URL, url);
 
@@ -80,7 +77,7 @@ AmIMullvad MullvadSession::am_i_mullvad() {
     // Process the response line by line.
     while (std::getline(stream, line)) {
         lower.clear();
-        std::ranges::transform(line, lower.begin(), ::tolower);
+        std::ranges::transform(line, std::back_inserter(lower), ::tolower);
 
         // Check for Mullvad connection status.
         if (lower.find("you are using mullvad vpn") != std::string::npos) {
@@ -114,7 +111,7 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
 
     // Reset the curl handle before the new transfer.
     curl_easy_reset(m_curl);
-    if (m_proxy)
+    if (m_is_proxy_enabled)
         curl_easy_setopt(m_curl, CURLOPT_PROXY, m_proxy);
     curl_easy_setopt(m_curl, CURLOPT_URL, video.link.c_str());
     // Use fwrite to write directly to the file.
