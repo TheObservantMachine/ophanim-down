@@ -12,8 +12,9 @@ namespace vpn {
 
 class InvalidStatusCode final : public std::runtime_error {
 public:
-    explicit InvalidStatusCode(const std::string &s) : runtime_error(s) {}
-    explicit InvalidStatusCode(const char *string) : runtime_error(string) {}
+    explicit InvalidStatusCode(const std::string &s, long code = -1) : runtime_error(s), code(code) {}
+    explicit InvalidStatusCode(const char *string, long code = -1) : runtime_error(string), code(code) {}
+    long code;
 };
 
 
@@ -39,8 +40,10 @@ public:
     void set_max_speed_mib_ps(int32_t mbps);
     /** Get max download speed in MiB/s. 0 means disabled */
     int32_t get_max_speed_mib_ps() const;
+
 private:
     void set_user_agent();
+
 private:
     CURL *m_curl;
     bool m_is_proxy_enabled;

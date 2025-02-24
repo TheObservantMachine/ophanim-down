@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
         spdlog::info("Speedlimit is set to unlimited");
 
     size_t counter = 0;
-    const size_t MAX_ERR = 3;
+    size_t counter_not_found = 0;
+    const size_t MAX_ERR = 4;
 
     // The videomanager will autosave
     auto video_manager = manager::VideoManager::create(db, cli.id_dir / "downloaded-ids.json").into_filtered();
@@ -107,13 +108,30 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            bool is_err;
+            bool is_err = false, try_next = false;
             for (size_t err_count = 0; err_count < MAX_ERR; err_count++) {
+                if (should_shutdown)
+                    break;
+
                 try {
                     session.download_video(cli.video_dir, wrapped_video.get_video());
                     is_err = false;
+                    counter_not_found = 0;
                     break;
                 } catch (const std::exception &e) {
+                    if (const vpn::InvalidStatusCode *ivs = dynamic_cast<const vpn::InvalidStatusCode *>(&e)) {
+                        if (ivs->code == 404) {
+                            if (++counter_not_found >= MAX_ERR) {
+                                is_err = true;
+                                try_next = false;
+                                break;
+                            }
+                            spdlog::error("Got 404, not found ({}/{}). Trying next video...");
+                            try_next = true;
+                            break;
+                        }
+                    }
+
                     size_t to_sleep = (err_count + 1) * 5;
                     spdlog::error("Failed to get video ({}/{}). Waiting {} s. Got error: {}", err_count, MAX_ERR,
                                   to_sleep, e.what());
@@ -121,7 +139,7 @@ int main(int argc, char *argv[]) {
                     is_err = true;
                 }
             }
-            if (is_err) {
+            if (is_err && !try_next) {
                 spdlog::error("Failed to get video ({}/{})", MAX_ERR, MAX_ERR);
                 break;
             }

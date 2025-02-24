@@ -92,8 +92,11 @@ std::string MullvadSession::get(const char *url) {
     CURLcode res = curl_easy_perform(m_curl);
 
     if (res != CURLE_OK) {
+        long http_code = 0;
+        curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);
+
         std::string err_msg = (error_buffer[0] != '\0') ? error_buffer : curl_easy_strerror(res);
-        throw InvalidStatusCode(err_msg);
+        throw InvalidStatusCode(err_msg, http_code);
     }
 
     long status_code;
@@ -165,8 +168,10 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     CURLcode res = curl_easy_perform(m_curl);
     fclose(fp);
 
+    long http_code = 0;
+    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);
     if (res != CURLE_OK)
-        throw InvalidStatusCode("Download failed: " + std::string(curl_easy_strerror(res)));
+        throw InvalidStatusCode("Download failed: " + std::string(curl_easy_strerror(res)), http_code);
 
     curl_off_t bytes_downloaded;
     curl_easy_getinfo(m_curl, CURLINFO_SIZE_DOWNLOAD_T, &bytes_downloaded);
@@ -176,10 +181,8 @@ void MullvadSession::download_video(const std::filesystem::path &save_dir, const
     double average_speed_mib_ps = (elapsed_seconds > 0.0) ? downloaded_mib / elapsed_seconds : 0.0;
     spdlog::info("Downloaded {:.2f} MB @ ~{:.2f} Mib/s", downloaded_mib, average_speed_mib_ps * 8);
 
-    long http_code = 0;
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &http_code);
     if (http_code != 200)
-        throw InvalidStatusCode("Download failed with HTTP code: " + std::to_string(http_code));
+        throw InvalidStatusCode("Download failed with HTTP code: " + std::to_string(http_code), http_code);
 }
 
 bool AmIMullvad::parse_server_config(const std::string_view line) {
